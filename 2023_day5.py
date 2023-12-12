@@ -94,7 +94,159 @@ So, the lowest location number in this example is 35.
 
 What is the lowest location number that corresponds to any of the initial seed numbers?
 
+
+--- Part Two ---
+Everyone will starve if you only plant such a small number of seeds. Re-reading the almanac, it looks like the seeds: line actually describes ranges of seed numbers.
+
+The values on the initial seeds: line come in pairs. Within each pair, the first value is the start of the range and the second value is the length of the range. So, in the first line of the example above:
+
+seeds: 79 14 55 13
+This line describes two ranges of seed numbers to be planted in the garden. The first range starts with seed number 79 and contains 14 values: 79, 80, ..., 91, 92. The second range starts with seed number 55 and contains 13 values: 55, 56, ..., 66, 67.
+
+Now, rather than considering four seed numbers, you need to consider a total of 27 seed numbers.
+
+In the above example, the lowest location number can be obtained from seed number 82, which corresponds to soil 84, fertilizer 84, water 84, light 77, temperature 45, humidity 46, and location 46. So, the lowest location number is 46.
+
+Consider all of the initial seed numbers listed in the ranges on the first line of the almanac. What is the lowest location number that corresponds to any of the initial seed numbers?
 '''
 
+from read_files import read_all_as_str
+data = read_all_as_str("2023_day5_input.txt")
 
+def get_map_list(mapping_rows):
+    temp = []
+    mappings = mapping_rows.split(':\n')[1]
+    for mapping in mappings.split('\n'):
+        temp.append([eval(i) for i in mapping.split(' ')])
+    return temp
+
+def get_seed_list(seeds):
+    i = 0
+    seeds = [eval(i) for i in seeds]
+    new_seeds = []
+    while i < len(seeds)-1:
+        for j in list(range(seeds[i],seeds[i]+seeds[i+1])):
+            new_seeds.append(j)
+        i += 2
+    return list(set(new_seeds))
+
+def parse_input(data):
+    mappings = {}
+    for map in data.split("\n\n"):
+        if 'seeds' in map:
+            seeds = map.split(': ')[1].split(' ')
+            mappings['seeds'] = get_seed_list(seeds)
+        else:
+            map_name = map.split(' map:\n')[0]
+            mappings[map_name] = get_map_list(map)
+    return mappings
+
+def get_location(data):
+    maps = parse_input(data)
+    # print(maps)
+    locations = []
+    for seed in maps["seeds"]:
+        soil = None
+        fertilizer = None
+        water = None
+        light = None
+        temperature = None
+        humidity = None
+        location = None 
+        for mapping in maps["seed-to-soil"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if seed in range(mapping[1], mapping[1]+mapping[2]):
+                soil = mapping[0] + seed - mapping[1]
+                continue 
+        if soil is None:
+            soil = seed 
+
+        for mapping in maps["soil-to-fertilizer"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if soil in range(mapping[1], mapping[1]+mapping[2]):
+                fertilizer = mapping[0] + soil - mapping[1]
+                continue 
+        if fertilizer is None:
+            fertilizer = soil
+
+        for mapping in maps["fertilizer-to-water"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if fertilizer in range(mapping[1], mapping[1]+mapping[2]):
+                water = mapping[0] + fertilizer - mapping[1]
+                continue 
+        if water is None:
+            water = fertilizer
+
+        for mapping in maps["water-to-light"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if water in range(mapping[1], mapping[1]+mapping[2]):
+                light = mapping[0] + water - mapping[1]
+                continue 
+        if light is None:
+            light = water
+
+        for mapping in maps["light-to-temperature"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if light in range(mapping[1], mapping[1]+mapping[2]):
+                temperature = mapping[0] + light - mapping[1]
+                continue 
+        if temperature is None:
+            temperature = light
+
+        for mapping in maps["temperature-to-humidity"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if temperature in range(mapping[1], mapping[1]+mapping[2]):
+                humidity = mapping[0] + temperature - mapping[1]
+                continue 
+        if humidity is None:
+            humidity = temperature
+
+        for mapping in maps["humidity-to-location"]:
+            # print(range(mapping[1], mapping[1]+mapping[2]))
+            if humidity in range(mapping[1], mapping[1]+mapping[2]):
+                location = mapping[0] + humidity - mapping[1]
+                continue 
+        if location is None:
+            location = humidity
+
+        locations.append(location)
+    return locations
+
+
+# print(min(get_location(['''seeds: 79 14 55 13
+
+# seed-to-soil map:
+# 50 98 2
+# 52 50 48
+
+# soil-to-fertilizer map:
+# 0 15 37
+# 37 52 2
+# 39 0 15
+
+# fertilizer-to-water map:
+# 49 53 8
+# 0 11 42
+# 42 0 7
+# 57 7 4
+
+# water-to-light map:
+# 88 18 7
+# 18 25 70
+
+# light-to-temperature map:
+# 45 77 23
+# 81 45 19
+# 68 64 13
+
+# temperature-to-humidity map:
+# 0 69 1
+# 1 0 69
+
+# humidity-to-location map:
+# 60 56 37
+# 56 93 4'''])))
+
+
+print(min(get_location(data)))
 
