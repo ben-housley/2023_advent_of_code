@@ -64,10 +64,60 @@ If you find the next value for each history in this example and add them togethe
 
 Analyze your OASIS report and extrapolate the next value for each history. What is the sum of these extrapolated values?
 
+--- Part Two ---
+Of course, it would be nice to have even more history included in your report. Surely it's safe to just extrapolate backwards as well, right?
 
+For each history, repeat the process of finding differences until the sequence of differences is entirely zero. Then, rather than adding a zero to the end and filling in the next values of each previous sequence, you should instead add a zero to the beginning of your sequence of zeroes, then fill in new first values for each previous sequence.
+
+In particular, here is what the third example history looks like when extrapolating back in time:
+
+5  10  13  16  21  30  45
+  5   3   3   5   9  15
+   -2   0   2   4   6
+      2   2   2   2
+        0   0   0
+Adding the new values on the left side of each sequence from bottom to top eventually reveals the new left-most history value: 5.
+
+Doing this for the remaining example data above results in previous values of -3 for the first history and 0 for the second history. Adding all three new values together produces 2.
+
+Analyze your OASIS report again, this time extrapolating the previous value for each history. What is the sum of these extrapolated values?
 '''
-from read_files import read_all_as_str
-data = read_all_as_str("2023_day8_input.txt")
+import numpy as np
+from read_files import read_one_item_per_line
+data = read_one_item_per_line("2023_day9_input.txt")
+
+def parse(data):
+    out = []
+    for row in data:
+        out.append([int(i) for i in row.split()])
+    return out
+
+def find_top_diff(seq):
+    diff = np.diff(seq)
+    # print(diff)
+    if any(diff) != 0:
+       return diff[0] - find_top_diff(diff)
+    #    return diff[-1] + find_top_diff(diff)
+    else:
+        return 0
+
+def extrapolate(data):
+    patterns = parse(data)
+    # print(patterns)
+    all_nums = []
+    for pattern in patterns:
+        # print(find_top_diff(pattern))
+        all_nums.append(pattern[0] - find_top_diff(pattern))
+        # all_nums.append(pattern[-1] + find_top_diff(pattern))
+    print(all_nums)
+    return sum(all_nums) 
+
+print(extrapolate(['0 3 6 9 12 15',
+'1 3 6 10 15 21',
+'10 13 16 21 30 45']))
+
+print(extrapolate(data))
+
 
 
 
