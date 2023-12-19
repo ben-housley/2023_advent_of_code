@@ -121,14 +121,13 @@ def get_map_list(mapping_rows):
     return temp
 
 def get_seed_list(seeds):
-    i = 0
-    seeds = [eval(i) for i in seeds]
+    seed_range = [int(seed) for seed in seeds]
     new_seeds = []
-    while i < len(seeds)-1:
-        for j in list(range(seeds[i],seeds[i]+seeds[i+1])):
-            new_seeds.append(j)
-        i += 2
-    return list(set(new_seeds))
+    for i in [2*x for x in range(int(len(seed_range)/2))]:
+        seed_start = seed_range[i]
+        seed_len = seed_range[i+1]
+        new_seeds.append((seed_start, seed_start+seed_len))
+    return new_seeds
 
 def parse_input(data):
     mappings = {}
